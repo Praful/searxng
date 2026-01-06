@@ -1,12 +1,20 @@
-import webbrowser
+# /// script
+# dependencies = [
+#   "requests",
+#   "textual",
+# ]
+# ///
+
 import subprocess
 import requests
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Input, ListItem, ListView, Static, Label
 from textual.containers import Container
 
+
 class SearchResult(ListItem):
     """A custom widget to display search results."""
+
     def __init__(self, title, url, snippet):
         super().__init__()
         self.title = title
@@ -17,6 +25,7 @@ class SearchResult(ListItem):
         yield Label(f"[b][green]{self.title}[/green][/b]")
         yield Label(f"[i]{self.url}[/i]")
         yield Label(f"{self.snippet[:100]}...", variant="dim")
+
 
 class SearxTUI(App):
     # Standard CSS with valid border types
@@ -35,7 +44,7 @@ class SearxTUI(App):
         border-bottom: solid $primary-darken-1; 
     }
     """
-    
+
     # Updated Bindings: Added 'escape' and 'q' for quitting
     BINDINGS = [
         ("q", "quit", "Quit"),
@@ -61,7 +70,7 @@ class SearxTUI(App):
         """Unified logic for Enter and 'l' key."""
         if isinstance(selected_item, SearchResult):
             # Copy to Linux clipboard (requires xclip)
-            subprocess.run(['xclip', '-selection', 'clipboard'], 
+            subprocess.run(['xclip', '-selection', 'clipboard'],
                            input=selected_item.url.encode())
             # Fast open on Mint using xdg-open
             subprocess.Popen(['xdg-open', selected_item.url])
@@ -89,7 +98,7 @@ class SearxTUI(App):
         results_list.clear()
 
         try:
-            response = requests.get("http://localhost:8888/search", 
+            response = requests.get("http://localhost:8888/search",
                                     params={'q': query, 'format': 'json'})
             results = response.json().get('results', [])
 
@@ -97,7 +106,8 @@ class SearxTUI(App):
                 results_list.append(SearchResult(
                     res.get('title', 'No Title'),
                     res.get('url', ''),
-                    res.get('content', '').replace('<b>', '').replace('</b>', '')
+                    res.get('content', '').replace(
+                        '<b>', '').replace('</b>', '')
                 ))
         except Exception as e:
             results_list.append(ListItem(Label(f"Error: {e}")))

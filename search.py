@@ -1,14 +1,24 @@
+# /// script
+# dependencies = [
+#   "requests",
+# ]
+# ///
+
 import requests
 import sys
 import subprocess
 from urllib.parse import quote
 
+
 def copy_to_clipboard(text):
     try:
-        process = subprocess.Popen(['xclip', '-selection', 'clipboard'], stdin=subprocess.PIPE)
+        process = subprocess.Popen(
+            ['xclip', '-selection', 'clipboard'], stdin=subprocess.PIPE)
         process.communicate(input=text.encode('utf-8'))
     except FileNotFoundError:
-        print("\n\033[1;31m[!] xclip not found. Run: sudo apt install xclip\033[0m")
+        print(
+            "\n\033[1;31m[!] xclip not found. Run: sudo apt install xclip\033[0m")
+
 
 def searx_query(query, copy_first=False):
     base_url = "http://localhost:8888/search"
@@ -24,7 +34,7 @@ def searx_query(query, copy_first=False):
             return
 
         print(f"\n--- Results for: {query} ---")
-        
+
         # Copy the top URL if requested
         if copy_first:
             first_url = results[0].get('url')
@@ -38,6 +48,7 @@ def searx_query(query, copy_first=False):
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
