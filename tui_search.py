@@ -14,6 +14,12 @@ from textual.widgets import Header, Footer, Input, ListItem, ListView, Label
 from textual.containers import Container
 
 class SearchResult(ListItem):
+    CSS = """
+    ListItem:focus {
+        background: #e0e0e0;
+    }
+    """ 
+
     """Widget to display numbered search results."""
     def __init__(self, title, url, snippet):
         super().__init__()
@@ -36,11 +42,7 @@ class SearxTUI(App):
         border: solid $accent; 
         height: 1fr; 
     }
-    ListView > .list-view--highlight {
-        background: #000000;
-        color: $text;
-        text-style: bold;
-    }
+
     Input { 
         margin: 1 2; 
         border: tall $accent; 
@@ -49,6 +51,7 @@ class SearxTUI(App):
         padding: 1; 
         border-bottom: solid $primary-darken-1; 
     }
+
     """
 
     BINDINGS = [
