@@ -103,6 +103,12 @@ class SearxTUI(App):
             url = list_view.highlighted_child.url
             self._handle_selection(url)
 
+    def on_mount(self) -> None:
+            # This overrides the theme's primary/accent colors globally
+            self.theme = "textual-dark" # or your preferred theme
+            self.styles.accent = "#34be5b" 
+            self.styles.primary = "#34be5b"
+
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Logic for 'Enter' key."""
         if isinstance(event.item, SearchResult):
