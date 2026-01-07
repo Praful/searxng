@@ -22,7 +22,7 @@ class SearchResult(ListItem):
         self.snippet = snippet
 
     def compose(self) -> ComposeResult:
-        yield Label(f"[b][green]{self.title}[/green][/b]")
+        yield Label(f"[b][orange]{self.title}[/orange][/b]")
         yield Label(f"[i]{self.url}[/i]")
         yield Label(f"{self.snippet[:100]}...", variant="dim")
 
