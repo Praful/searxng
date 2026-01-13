@@ -2,7 +2,7 @@
 docker pull docker.io/searxng/searxng:latest
 
 # remove old container 
-# docker rm -f searxng
+docker rm -f searxng
 
 # run
 docker run --name searxng -d \
