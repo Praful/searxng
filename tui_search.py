@@ -4,7 +4,7 @@
 #   "textual",
 # ]
 # ///
-
+import os
 import webbrowser
 import subprocess
 import requests
@@ -58,6 +58,9 @@ class SearxTUI(App):
         ("/", "focus_search", "Search"),
     ]
 
+    def quick_notify(self, message: str, severity: str = "information"):
+        self.notify(message, severity=severity, timeout=1.5)
+
     def __init__(self):
         super().__init__()
         self.current_urls = []
@@ -75,13 +78,34 @@ class SearxTUI(App):
             if index < len(self.current_urls):
                 self._handle_selection(self.current_urls[index], "Hotkey")
 
-    def _handle_selection(self, url, title="Result"):
-        """Unified copy to clipboard and open browser logic."""
-        # Copy to clipboard using xclip
-        subprocess.run(['xclip', '-selection', 'clipboard'], input=url.encode())
-        # Open in Mint's default browser
-        subprocess.Popen(['xdg-open', url])
-        self.notify(f"Opened: {url[:40]}...")
+    def _handle_selection(self, data):
+        """Handles selection whether 'data' is a string URL or a SearchResult object."""
+        # If data is a SearchResult object, get its url; otherwise assume data is the url
+        url = getattr(data, 'url', data)
+        title = getattr(data, 'title', "Link")
+
+        if isinstance(url, str) and url.startswith("http"):
+            # 1. Copy to clipboard
+            subprocess.run(['xclip', '-selection', 'clipboard'], input=url.encode())
+            
+            # 2. Open via xdg-open but silence the Flatpak/GTK errors
+            # We use Popen with DEVNULL to kill the terminal chatter
+            subprocess.Popen(
+                ['xdg-open', url],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            self.quick_notify(f"Opened: {title}")
+        else:
+            self.notify(f"Invalid selection: {type(data).__name__}", severity="error")
+
+
+    def action_open_link(self) -> None:
+        """Triggered by the 'l' key."""
+        list_view = self.query_one("#results_list", ListView)
+        if list_view.highlighted_child:
+            # Pass the highlighted child to our selection handler
+            self._handle_selection(list_view.highlighted_child)
 
     def action_cursor_down(self) -> None:
         self.query_one(ListView).action_cursor_down()
@@ -94,12 +118,6 @@ class SearxTUI(App):
         input_widget.value = ""
         input_widget.focus()
 
-    def action_open_link(self) -> None:
-        """Logic for 'l' key."""
-        list_view = self.query_one("#results_list", ListView)
-        if list_view.highlighted_child:
-            url = list_view.highlighted_child.url
-            self._handle_selection(url)
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Logic for 'Enter' key."""
